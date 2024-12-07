@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: react-app
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+    networks:
+      - mern-networks
+
+  backend:
+    build: ./backend
+    container_name: node-api
+    environment:
+      - PORT=3001
+      - URL=https://localhost
+      - MONGO_URL=mongodb://0.0.0.0:27017/SGP
+      - DB_NAME=SGP
+    ports:
+      - "1337:1337"
+    restart: always
+    depends_on:
+      - database
+    # command:
+    #   [
+    #     "./wait-for-it.sh",
+    #     "mongodb:27017",
+    #     "--",
+    #     "npm",
+    #     "start"
+    #   ]
+    networks:
+      - mern-networks
+
+  database:
+    image: mongo
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mern-networks
+
+networks:
+  mern-networks:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
